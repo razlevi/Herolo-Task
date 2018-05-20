@@ -1,0 +1,145 @@
+<h1>The Books Library</h1>
+
+<div class="row show-hide-message" *ngIf="message && isDelete">
+  <div [ngClass]="messageClass">
+    {{message}}
+  </div>
+</div>
+
+<div>
+  <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Index</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Date</th>
+          <th> + </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let article of articles; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{article.Title | capitalizeFirst}}</td>
+          <td>{{article.Author | capitalizeFirst}}</td>
+          <td>{{article.Date}}</td>
+          <td style="display: none"><input type="hidden" #id value={{article.id}}/></td>
+          <td><button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editModal" (click) = changeCurrentArticle(i)>Edit</button>&nbsp;&nbsp;<button class="btn btn-sm btn-danger" (click) = onDelete(i)>Delete</button></td>
+        </tr>
+      </tbody>
+  </table>
+</div>
+<button class="btn btn-sm btn-success" data-toggle="modal" data-target="#addModal">Add New</button>
+
+<!-- Modal -->
+<div id="editModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Edit Article</h4>
+      </div>
+      <div class="modal-body">
+          <div class="row show-hide-message col-md-12" *ngIf="message">
+            <div [ngClass]="messageClass">
+              {{message}}
+            </div>
+          </div>
+          <form [formGroup]="editForm" name="editForm" (submit)="onEditForm(date.value)">
+              <!-- Title input -->
+              <input type="hidden" name="id" class="form-control" autocomplete="off"/>
+              <div class="form-group">
+                <label for="author">Author</label>
+                <div [ngClass]="{'has-success': editForm.controls.author.valid, 'has-error': (editForm.controls.author.dirty && editForm.controls.author.errors)}">
+                    <input type="text" name="author" class="form-control"  autocomplete="off" value={{currentArticle.Author}} formControlName="author" />
+                    <ul class="help-block">
+                      <li *ngIf="editForm.controls.author.dirty && editForm.controls.author.errors?.required">This field is required.</li>
+                    </ul>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="title">Title</label>
+                <div [ngClass]="{'has-success': editForm.controls.title.valid, 'has-error': editForm.controls.title.dirty && editForm.controls.title.errors}">
+                    <input type="text" name="title" class="form-control" autocomplete="off" value={{currentArticle.Title}} formControlName="title" />
+                    <ul class="help-block">
+                      <li *ngIf="editForm.controls.title.dirty && editForm.controls.title.errors?.required">This field is required.</li>
+                    </ul>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="date">Date</label>
+                <div>
+                    <input type="date" #date name="date" class="form-control" autocomplete="off" value={{currentArticle.Date}} formControlName="date" />
+                    <!-- <ul class="help-block">
+                      <li *ngIf="editForm.controls.date.dirty && editForm.controls.date.errors?.required">This field is required.</li>
+                    </ul> -->
+                </div>
+              </div>
+              <button [disabled]="(processing || !editForm.valid)" type="submit" name="button" class="btn btn-sm btn-success">Submit</button>
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="addModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+  
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Add New Article</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row show-hide-message col-md-12" *ngIf="message">
+              <div [ngClass]="messageClass">
+                {{message}}
+              </div>
+            </div>
+            <form [formGroup]="addForm" name="addForm" (submit)="onAddForm()">
+                <!-- Title input -->
+                <div class="form-group">
+                  <label for="author">Author</label>
+                  <div [ngClass]="{'has-success': addForm.controls.author.valid, 'has-error': addForm.controls.author.dirty && addForm.controls.author.errors}">
+                      <input type="text" name="author" class="form-control" placeholder="*Author Name" autocomplete="off" formControlName="author" />
+                      <ul class="help-block">
+                        <li *ngIf="addForm.controls.author.dirty && addForm.controls.author.errors?.required">This field is required.</li>
+                      </ul>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="title">Title</label>
+                  <div [ngClass]="{'has-success': addForm.controls.title.valid, 'has-error': addForm.controls.title.dirty && addForm.controls.title.errors}">
+                      <input type="text" name="title" class="form-control" placeholder="*Title" autocomplete="off" formControlName="title" />
+                      <ul class="help-block">
+                        <li *ngIf="addForm.controls.title.dirty && addForm.controls.title.errors?.required">This field is required.</li>
+                      </ul>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="date">Date</label>
+                  <div [ngClass]="{'has-success': addForm.controls.date.valid, 'has-error': addForm.controls.date.dirty && addForm.controls.date.errors}">
+                      <input type="date" name="date" class="form-control" placeholder="*Date Name" autocomplete="off" formControlName="date" />
+                      <ul class="help-block">
+                        <li *ngIf="addForm.controls.date.dirty && addForm.controls.date.errors?.required">This field is required.</li>
+                        </ul>
+                  </div>
+                </div>
+                <button [disabled]="processing || !addForm.valid" type="submit" name="button" class="btn btn-sm btn-success">Add New</button>
+              </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+  
+    </div>
+  </div>
